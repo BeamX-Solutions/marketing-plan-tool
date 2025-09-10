@@ -1,20 +1,17 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Plan } from '@/types';
 import Button from '@/components/ui/Button';
 import ShareModal from '@/components/plan/ShareModal';
 import { Download, Share, Mail } from 'lucide-react';
-import { analytics } from '@/lib/analytics/analyticsService';
 
 interface PlanPageProps {
   params: { id: string };
 }
 
 const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,28 +28,16 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
 
       const planData = await response.json();
       setPlan(planData);
-      
-      // Track plan view
-      if (session?.user?.email) {
-        analytics.trackPlanViewed(session.user.email, params.id);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load plan');
     } finally {
       setLoading(false);
     }
-  }, [params.id, session?.user?.email]);
+  }, [params.id]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      fetchPlan();
-    }
-  }, [status, params.id, fetchPlan]);
+    fetchPlan();
+  }, [fetchPlan]);
 
   const downloadPDF = async () => {
     try {
@@ -71,11 +56,6 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      
-      // Track PDF download
-      if (session?.user?.email) {
-        analytics.trackPlanDownloaded(session.user.email, params.id, 'pdf');
-      }
     } catch (err) {
       alert('Failed to download PDF');
     }
@@ -98,8 +78,8 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Plan Not Found</h1>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Button onClick={() => router.push('/dashboard')}>
-            Back to Dashboard
+          <Button onClick={() => router.push('/')}>
+            Back to Home
           </Button>
         </div>
       </div>
@@ -315,7 +295,7 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         planId={params.id}
-        businessName={plan?.user?.businessName}
+        businessName={plan?.businessContext?.businessName}
       />
     </div>
   );

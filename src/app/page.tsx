@@ -2,12 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 import Button from '@/components/ui/Button';
 import { ArrowRight, CheckCircle, Star, Users, Target, TrendingUp } from 'lucide-react';
 
 export default function HomePage() {
-  const { data: session, status } = useSession();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -19,25 +17,9 @@ export default function HomePage() {
               MarketingPlan.ai
             </div>
             <div className="flex items-center space-x-4">
-              {session ? (
-                <>
-                  <Link href="/dashboard">
-                    <Button variant="outline">Dashboard</Button>
-                  </Link>
-                  <Link href="/questionnaire">
-                    <Button>Create New Plan</Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/signin">
-                    <Button variant="outline">Sign In</Button>
-                  </Link>
-                  <Link href="/questionnaire">
-                    <Button>Get Started Free</Button>
-                  </Link>
-                </>
-              )}
+              <Link href="/questionnaire">
+                <Button>Create Marketing Plan</Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -295,8 +277,7 @@ export default function HomePage() {
               <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
               <ul className="space-y-2 text-gray-600">
                 <li><a href="mailto:support@marketingplan.ai" className="hover:text-blue-600">Contact Support</a></li>
-                <li><Link href="/auth/signin">Sign In</Link></li>
-                <li><Link href="/auth/signup">Sign Up</Link></li>
+                <li><Link href="/questionnaire">Get Started</Link></li>
               </ul>
             </div>
           </div>

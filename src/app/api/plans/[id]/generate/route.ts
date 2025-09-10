@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/lib/auth';
 import { claudeService } from '@/lib/claude';
-import { emailService } from '@/lib/email/emailService';
 import { BusinessContext, QuestionnaireResponses } from '@/types';
 
 const prisma = new PrismaClient();
@@ -13,22 +10,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { id: planId } = await params;
 
-    // Find the plan
-    const plan = await prisma.plan.findFirst({
+    // Find the plan (no authentication required)
+    const plan = await prisma.plan.findUnique({
       where: {
-        id: planId,
-        user: { email: session.user.email }
-      },
-      include: {
-        user: true
+        id: planId
       }
     });
 
@@ -125,49 +112,7 @@ export async function POST(
 
     console.log('Plan generation completed successfully');
 
-    // Step 3: Send completion email to user
-    try {
-      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-      const downloadUrl = `${baseUrl}/plan/${plan.id}`;
-
-      const emailData = {
-        businessName: plan.user.businessName || undefined,
-        userEmail: plan.user.email,
-        planId: plan.id,
-        generatedContent: generatedContent,
-        businessContext: plan.businessContext as BusinessContext,
-        createdAt: updatedPlan.createdAt.toISOString(),
-        downloadUrl: downloadUrl
-      };
-
-      const emailSent = await emailService.sendPlanCompletionEmail(emailData);
-      
-      // Log email attempt
-      await prisma.claudeInteraction.create({
-        data: {
-          planId: plan.id,
-          interactionType: 'email_completion_auto',
-          promptData: JSON.stringify({ 
-            emailSent,
-            recipientEmail: plan.user.email
-          }),
-          claudeResponse: JSON.stringify({ 
-            success: emailSent,
-            sentAt: new Date().toISOString(),
-            emailType: 'completion'
-          })
-        }
-      });
-
-      if (emailSent) {
-        console.log('Completion email sent successfully to:', plan.user.email);
-      } else {
-        console.warn('Failed to send completion email to:', plan.user.email);
-      }
-    } catch (emailError) {
-      console.error('Error sending completion email:', emailError);
-      // Don't fail the entire process if email fails
-    }
+    // No email sending since there's no user authentication
 
     return NextResponse.json({
       success: true,

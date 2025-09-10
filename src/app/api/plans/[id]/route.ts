@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -10,21 +8,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { id: planId } = await params;
 
-    const plan = await prisma.plan.findFirst({
+    const plan = await prisma.plan.findUnique({
       where: {
-        id: planId,
-        user: { email: session.user.email }
+        id: planId
       },
       include: {
-        user: true,
         claudeInteractions: {
           orderBy: { createdAt: 'desc' },
           take: 10
@@ -71,20 +61,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
     const { id: planId } = await params;
 
-    // Verify plan ownership
-    const existingPlan = await prisma.plan.findFirst({
+    // Find the plan (no authentication required)
+    const existingPlan = await prisma.plan.findUnique({
       where: {
-        id: planId,
-        user: { email: session.user.email }
+        id: planId
       }
     });
 
@@ -120,19 +103,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { id: planId } = await params;
 
-    // Verify plan ownership
-    const plan = await prisma.plan.findFirst({
+    // Find the plan (no authentication required)
+    const plan = await prisma.plan.findUnique({
       where: {
-        id: planId,
-        user: { email: session.user.email }
+        id: planId
       }
     });
 

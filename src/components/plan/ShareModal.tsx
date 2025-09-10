@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
 import { X, Mail, Send } from 'lucide-react';
-import { analytics } from '@/lib/analytics/analyticsService';
-import { useSession } from 'next-auth/react';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -19,7 +17,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
   planId,
   businessName
 }) => {
-  const { data: session } = useSession();
   const [recipientEmail, setRecipientEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,11 +48,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to share plan');
-      }
-
-      // Track plan share
-      if (session?.user?.email) {
-        analytics.trackPlanShared(session.user.email, planId, 'email');
       }
 
       setSuccess(true);

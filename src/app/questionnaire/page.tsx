@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import QuestionnaireStep from '@/components/questionnaire/QuestionnaireStep';
 import ProgressBar from '@/components/questionnaire/ProgressBar';
@@ -12,10 +11,8 @@ import {
   MARKETING_SQUARES 
 } from '@/constants/questionnaire';
 import { BusinessContext, QuestionnaireResponses, Question } from '@/types';
-import { analytics } from '@/lib/analytics/analyticsService';
 
 const QuestionnairePage = () => {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentSquare, setCurrentSquare] = useState(0);
@@ -24,18 +21,10 @@ const QuestionnairePage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [startTime] = useState<number>(Date.now());
 
-  // Redirect if not authenticated and track questionnaire start
+  // Track questionnaire start
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    } else if (status === 'authenticated' && session?.user?.email) {
-      // Track questionnaire start
-      analytics.trackQuestionnaireStart(session.user.email, responses['industry']);
-      analytics.identify(session.user.email, {
-        business_name: session.user.name || 'Unknown'
-      });
-    }
-  }, [status, router, session]);
+    // No authentication required - removed auth check
+  }, []);
 
   // Get all questions in order
   const allQuestions: Question[] = [
@@ -64,16 +53,6 @@ const QuestionnairePage = () => {
   };
 
   const handleNext = async () => {
-    // Track progress
-    if (session?.user?.email) {
-      analytics.trackQuestionnaireProgress(
-        session.user.email,
-        currentQuestion.square,
-        currentQuestionIndex,
-        allQuestions.length
-      );
-    }
-
     // Mark current square as completed if we're moving to a different square
     const nextQuestion = allQuestions[currentQuestionIndex + 1];
     if (nextQuestion && nextQuestion.square !== currentQuestion.square) {
@@ -89,15 +68,6 @@ const QuestionnairePage = () => {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       // Last question - generate the marketing plan
-      const completionTime = Date.now() - startTime;
-      if (session?.user?.email) {
-        analytics.trackQuestionnaireCompleted(
-          session.user.email,
-          completionTime,
-          responses['industry'],
-          responses['business-model']
-        );
-      }
       await generateMarketingPlan();
     }
   };
@@ -110,7 +80,6 @@ const QuestionnairePage = () => {
 
   const generateMarketingPlan = async () => {
     setIsGenerating(true);
-    const generationStartTime = Date.now();
     
     try {
       // Structure responses according to our types
@@ -143,11 +112,6 @@ const QuestionnairePage = () => {
 
       const plan = await planResponse.json();
       
-      // Track plan generation started
-      if (session?.user?.email) {
-        analytics.trackPlanGenerationStarted(session.user.email, plan.id);
-      }
-      
       // Start the AI generation process
       const generateResponse = await fetch(`/api/plans/${plan.id}/generate`, {
         method: 'POST'
@@ -158,31 +122,11 @@ const QuestionnairePage = () => {
       }
 
       const generateResult = await generateResponse.json();
-      const generationTime = Date.now() - generationStartTime;
-
-      // Track plan generation completed
-      if (session?.user?.email) {
-        analytics.trackPlanGenerationCompleted(
-          session.user.email, 
-          plan.id, 
-          generationTime
-        );
-      }
 
       // Redirect to the results page
       router.push(`/plan/${plan.id}`);
     } catch (error) {
       console.error('Error generating plan:', error);
-      
-      // Track plan generation failed
-      if (session?.user?.email) {
-        analytics.trackPlanGenerationFailed(
-          session.user.email, 
-          undefined, // plan ID might not be available
-          error instanceof Error ? error.message : 'Unknown error'
-        );
-      }
-      
       alert('Failed to generate marketing plan. Please try again.');
     } finally {
       setIsGenerating(false);
@@ -201,17 +145,7 @@ const QuestionnairePage = () => {
     }
   }, []);
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null; // Will redirect in useEffect
-  }
+  // Removed authentication checks
 
   if (isGenerating) {
     return (
