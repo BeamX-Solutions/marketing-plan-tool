@@ -13,8 +13,12 @@ export default function HomePage() {
       <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex justify-between items-center py-4">
-            <div className="text-2xl font-bold text-blue-600">
-              MarketingPlan.ai
+            <div>
+              <img
+              src="/Beamx-Logo-Colour.png"
+              alt="BeamX Solutions Logo"
+              className="h-12 w-auto max-w-[200px] transition-transform duration-300 hover:scale-105"
+              />
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/questionnaire">
@@ -61,7 +65,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center space-x-2">
               <Users className="w-5 h-5" />
-              <span>1000+ Plans Created</span>
+              <span>100+ Plans Created</span>
             </div>
             <div className="flex items-center space-x-2">
               <Target className="w-5 h-5" />
@@ -250,8 +254,12 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="text-2xl font-bold text-blue-600 mb-4">
-                MarketingPlan.ai
+              <div>
+                <img
+                  src="/Beamx-Logo-Colour.png"
+                  alt="BeamX Solutions Logo"
+                  className="h-12 w-auto max-w-[200px] transition-transform duration-300 hover:scale-105"
+                />
               </div>
               <p className="text-gray-600">
                 AI-powered marketing plan generator for small businesses and entrepreneurs.
@@ -282,7 +290,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-200 pt-8 mt-8 text-center text-gray-600">
-            <p>&copy; 2024 MarketingPlan.ai. All rights reserved.</p>
+            <p>&copy; 2025 BeamX Solutions. All rights reserved.</p>
           </div>
         </div>
       </footer>
