@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -18,9 +18,8 @@ model User {
   marketingConsent   Boolean   @default(false)
   profileData        String?
   subscriptionStatus String    @default("free")
-
-  accounts Account[]
-  sessions Session[]
+  accounts           Account[]
+  sessions           Session[]
 
   @@map("users")
 }
@@ -52,13 +51,11 @@ model ClaudeInteraction {
   tokensUsed       Int?
   processingTimeMs Int?
   createdAt        DateTime @default(now())
-
-  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  plan             Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@map("claude_interactions")
 }
 
-// NextAuth.js Models
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -72,8 +69,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
