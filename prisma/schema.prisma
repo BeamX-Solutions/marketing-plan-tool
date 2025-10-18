@@ -8,56 +8,53 @@ datasource db {
 }
 
 model User {
-  id                  String    @id @default(cuid())
-  email               String    @unique
-  businessName        String?
-  industry            String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  lastLoginAt         DateTime?
-  marketingConsent    Boolean   @default(false)
-  profileData         String?
-  subscriptionStatus  String    @default("free")
-  
-  plans               Plan[]
-  accounts            Account[]
-  sessions            Session[]
-  
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  businessName       String?
+  industry           String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastLoginAt        DateTime?
+  marketingConsent   Boolean   @default(false)
+  profileData        String?
+  subscriptionStatus String    @default("free")
+
+  accounts Account[]
+  sessions Session[]
+
   @@map("users")
 }
 
 model Plan {
-  id                      String    @id @default(cuid())
-  userId                  String?
-  businessContext         String
-  questionnaireResponses  String
-  claudeAnalysis          String?
-  generatedContent        String?
-  planMetadata            String?
-  status                  String    @default("in_progress")
-  completionPercentage    Int       @default(0)
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  completedAt             DateTime?
-  
-  user                    User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  claudeInteractions      ClaudeInteraction[]
-  
+  id                     String              @id @default(cuid())
+  userId                 String?
+  businessContext        Json?
+  questionnaireResponses Json?
+  claudeAnalysis         String?
+  generatedContent       String?
+  planMetadata           String?
+  status                 String              @default("in_progress")
+  completionPercentage   Int                 @default(0)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  completedAt            DateTime?
+  claudeInteractions     ClaudeInteraction[]
+
   @@map("plans")
 }
 
 model ClaudeInteraction {
-  id                String    @id @default(cuid())
-  planId            String
-  interactionType   String
-  promptData        String
-  claudeResponse    String
-  tokensUsed        Int?
-  processingTimeMs  Int?
-  createdAt         DateTime  @default(now())
-  
-  plan              Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
-  
+  id               String   @id @default(cuid())
+  planId           String
+  interactionType  String
+  promptData       String
+  claudeResponse   String
+  tokensUsed       Int?
+  processingTimeMs Int?
+  createdAt        DateTime @default(now())
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
   @@map("claude_interactions")
 }
 
