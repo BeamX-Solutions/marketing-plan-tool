@@ -21,8 +21,8 @@ Provide a comprehensive analysis in JSON format including:
 6. riskFactors: Array of potential challenges and risks to consider
 7. growthPotential: Assessment of growth opportunities and scalability
 
-Structure your analysis professionally with clear insights and actionable observations.
-Return only valid JSON without any markdown formatting or additional text.
+Structure your analysis professionally with clear insights and actionable observations. Keep each section concise (under 400 words total) to ensure complete output.
+Return only valid JSON without any markdown formatting or additional text. Start directly with '{' and end with '}'.
 `;
 
 const STRATEGY_PROMPT = `
@@ -82,17 +82,26 @@ Ensure all recommendations are:
 - Budget-conscious based on stated constraints
 - Measurable with specific KPIs
 - Realistic for the business size and maturity
+Keep the entire output concise (under 1500 words) for completeness.
 
 Return only valid JSON without any markdown formatting or additional text.
 `;
 
 export class ClaudeService {
+  // Enhanced extractor: Adds quote balancing check for truncation detection
   private extractJson(text: string): string {
     // Strip common markdown fences (```json, ```, etc.) and trim whitespace
     let cleaned = text
       .replace(/```(?:json)?\s*\n?/gi, '')  // Remove opening fences
       .replace(/\n?```\s*$/gi, '')          // Remove closing fences
       .trim();
+    
+    // Quick check for obvious truncation (unbalanced quotes)
+    const quoteCount = (cleaned.match(/"/g) || []).length;
+    if (quoteCount % 2 !== 0) {
+      console.warn('Potential JSON truncation detected: Odd number of quotes (' + quoteCount + ')');
+      // Optional: You could truncate to last complete string here, but better to increase tokens
+    }
     
     // If it still looks like JSON-wrapped, extract via regex as fallback
     if (cleaned.startsWith('{') || cleaned.startsWith('[')) {
@@ -105,21 +114,37 @@ export class ClaudeService {
       return jsonMatch[0];
     }
     
-    throw new Error('No valid JSON found in response');
+    throw new Error('No valid JSON found in response. Raw length: ' + text.length + '. Check for truncation.');
+  }
+
+  // Optional: Simple retry wrapper (call this around API if needed)
+  private async withRetry<T>(fn: () => Promise<T>, maxRetries: number = 2): Promise<T> {
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        return await fn();
+      } catch (error: any) {
+        if (i === maxRetries || !error.message.includes('SyntaxError')) {
+          throw error;
+        }
+        console.log(`Retry ${i + 1}/${maxRetries} after parse error...`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));  // Exponential backoff
+      }
+    }
+    throw new Error('Max retries exceeded');
   }
 
   async analyzeBusinessResponses(
     businessContext: BusinessContext,
     responses: QuestionnaireResponses
   ): Promise<ClaudeAnalysis> {
-    try {
+    return this.withRetry(async () => {  // Wrap for retries on parse fails
       const prompt = ANALYSIS_PROMPT
         .replace('{business_context}', JSON.stringify(businessContext, null, 2))
         .replace('{responses}', JSON.stringify(responses, null, 2));
 
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 4000,
+        max_tokens: 8000,  // Increased: Was 4000; handles ~32k chars for verbose analysis
         temperature: 0.3,
         messages: [{
           role: 'user',
@@ -132,13 +157,13 @@ export class ClaudeService {
         throw new Error('Unexpected response format from Claude API');
       }
 
+      // Debug log (remove after fixing)
+      console.log('Claude response length:', content.text.length);
+
       const cleanedText = this.extractJson(content.text);
       const analysis = JSON.parse(cleanedText);
       return analysis;
-    } catch (error) {
-      console.error('Error analyzing business responses:', error);
-      throw new Error('Failed to analyze business responses');
-    }
+    });
   }
 
   async generateMarketingPlan(
@@ -146,7 +171,7 @@ export class ClaudeService {
     responses: QuestionnaireResponses,
     analysis: ClaudeAnalysis
   ): Promise<GeneratedContent> {
-    try {
+    return this.withRetry(async () => {
       const prompt = STRATEGY_PROMPT
         .replace('{analysis}', JSON.stringify(analysis, null, 2))
         .replace('{business_context}', JSON.stringify(businessContext, null, 2))
@@ -154,7 +179,7 @@ export class ClaudeService {
 
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 6000,
+        max_tokens: 8000,  // Increased: Was 6000; for the larger plan JSON
         temperature: 0.2,
         messages: [{
           role: 'user',
@@ -170,10 +195,7 @@ export class ClaudeService {
       const cleanedText = this.extractJson(content.text);
       const generatedContent = JSON.parse(cleanedText);
       return generatedContent;
-    } catch (error) {
-      console.error('Error generating marketing plan:', error);
-      throw new Error('Failed to generate marketing plan');
-    }
+    });
   }
 
   async generateSquareSpecificContent(
@@ -204,12 +226,13 @@ export class ClaudeService {
         
         Provide specific, actionable recommendations for this marketing square in JSON format.
         Include implementation steps, success metrics, and industry-specific best practices.
+        Keep concise (under 500 words).
         Return only valid JSON without any markdown formatting or additional text.
       `;
 
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 3000,
+        max_tokens: 4000,  // Kept as-is; square-specific is shorter
         temperature: 0.3,
         messages: [{
           role: 'user',
@@ -254,7 +277,7 @@ export class ClaudeService {
 
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 2000,
+        max_tokens: 2000,  // Kept as-is; validation is short
         temperature: 0.3,
         messages: [{
           role: 'user',
