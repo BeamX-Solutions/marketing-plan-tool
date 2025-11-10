@@ -87,6 +87,27 @@ Return only valid JSON without any markdown formatting or additional text.
 `;
 
 export class ClaudeService {
+  private extractJson(text: string): string {
+    // Strip common markdown fences (```json, ```, etc.) and trim whitespace
+    let cleaned = text
+      .replace(/```(?:json)?\s*\n?/gi, '')  // Remove opening fences
+      .replace(/\n?```\s*$/gi, '')          // Remove closing fences
+      .trim();
+    
+    // If it still looks like JSON-wrapped, extract via regex as fallback
+    if (cleaned.startsWith('{') || cleaned.startsWith('[')) {
+      return cleaned;
+    }
+    
+    // Fallback regex to pull JSON object/array from text
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (jsonMatch) {
+      return jsonMatch[0];
+    }
+    
+    throw new Error('No valid JSON found in response');
+  }
+
   async analyzeBusinessResponses(
     businessContext: BusinessContext,
     responses: QuestionnaireResponses
@@ -111,7 +132,8 @@ export class ClaudeService {
         throw new Error('Unexpected response format from Claude API');
       }
 
-      const analysis = JSON.parse(content.text);
+      const cleanedText = this.extractJson(content.text);
+      const analysis = JSON.parse(cleanedText);
       return analysis;
     } catch (error) {
       console.error('Error analyzing business responses:', error);
@@ -145,7 +167,8 @@ export class ClaudeService {
         throw new Error('Unexpected response format from Claude API');
       }
 
-      const generatedContent = JSON.parse(content.text);
+      const cleanedText = this.extractJson(content.text);
+      const generatedContent = JSON.parse(cleanedText);
       return generatedContent;
     } catch (error) {
       console.error('Error generating marketing plan:', error);
@@ -199,7 +222,8 @@ export class ClaudeService {
         throw new Error('Unexpected response format from Claude API');
       }
 
-      return JSON.parse(content.text);
+      const cleanedText = this.extractJson(content.text);
+      return JSON.parse(cleanedText);
     } catch (error) {
       console.error(`Error generating square ${square} content:`, error);
       throw new Error(`Failed to generate square ${square} content`);
@@ -243,7 +267,8 @@ export class ClaudeService {
         throw new Error('Unexpected response format from Claude API');
       }
 
-      return JSON.parse(content.text);
+      const cleanedText = this.extractJson(content.text);
+      return JSON.parse(cleanedText);
     } catch (error) {
       console.error('Error validating responses:', error);
       return { suggestions: [], completionScore: 0 };
