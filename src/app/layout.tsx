@@ -8,22 +8,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MarketingPlan.ai - AI-Powered Marketing Plan Generator",
+  title: "Marketing Plan Tool — BeamX Solutions",
   description: "Generate comprehensive marketing plans in minutes with Claude AI. Create your personalized marketing strategy using our proven 9-square framework.",
   keywords: "marketing plan, AI marketing, business strategy, Claude AI, marketing automation, small business marketing",
-  authors: [{ name: "MarketingPlan.ai" }],
-  creator: "MarketingPlan.ai",
-  publisher: "MarketingPlan.ai",
+  authors: [{ name: "BeamX Solutions" }],
+  creator: "BeamX Solutions",
+  publisher: "BeamX Solutions",
   openGraph: {
-    title: "MarketingPlan.ai - AI-Powered Marketing Plan Generator",
+    title: "Marketing Plan Tool — BeamX Solutions",
     description: "Generate comprehensive marketing plans in minutes with Claude AI",
-  url: "https://marketingplan.beamxsolutions.com",
-    siteName: "MarketingPlan.ai",
+    url: "https://marketingplan.beamxsolutions.com",
+    siteName: "Marketing Plan Tool — BeamX Solutions",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MarketingPlan.ai - AI-Powered Marketing Plan Generator",
+    title: "Marketing Plan Tool — BeamX Solutions",
     description: "Generate comprehensive marketing plans in minutes with Claude AI",
   },
   robots: {
