@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MarketingPlan.ai - AI-Powered Marketing Plan Generator",
     description: "Generate comprehensive marketing plans in minutes with Claude AI",
-    url: "https://marketingplan.ai",
+  url: "https://marketingplan.beamxsolutions.com",
     siteName: "MarketingPlan.ai",
     type: "website",
   },

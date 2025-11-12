@@ -301,7 +301,7 @@ pm2 startup
 
 #### **Step 5: Nginx Configuration**
 
-Create `/etc/nginx/sites-available/marketingplan.ai`:
+Create `/etc/nginx/sites-available/marketingplan.beamxsolutions.com`:
 ```nginx
 server {
     listen 80;
@@ -323,7 +323,7 @@ server {
 
 ```bash
 # Enable site
-sudo ln -s /etc/nginx/sites-available/marketingplan.ai /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/marketingplan.beamxsolutions.com /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 

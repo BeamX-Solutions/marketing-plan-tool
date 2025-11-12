@@ -284,7 +284,7 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
               <ul className="space-y-2 text-gray-600">
-                <li><a href="mailto:support@marketingplan.ai" className="hover:text-blue-600">Contact Support</a></li>
+                <li><a href="mailto:support@marketingplan.beamxsolutions.com" className="hover:text-blue-600">Contact Support</a></li>
                 <li><Link href="/questionnaire">Get Started</Link></li>
               </ul>
             </div>

@@ -18,7 +18,7 @@ export interface EmailTemplateData {
 }
 
 export class EmailService {
-  private fromEmail = 'MarketingPlan.ai <noreply@marketingplan.ai>';
+    private fromEmail = 'MarketingPlan.ai <noreply@marketingplan.beamxsolutions.com>';
   
   async sendPlanCompletionEmail(data: EmailTemplateData): Promise<boolean> {
     try {
@@ -204,7 +204,7 @@ export class EmailService {
                 <!-- Support -->
                 <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f9fafb; border-radius: 8px;">
                     <p style="margin: 0; color: #6b7280;">Need help implementing your plan?</p>
-                    <a href="mailto:support@marketingplan.ai" style="color: #2563eb; text-decoration: none; font-weight: 500;">Contact our support team</a>
+                    <a href="mailto:support@marketingplan.beamxsolutions.com" style="color: #2563eb; text-decoration: none; font-weight: 500;">Contact our support team</a>
                 </div>
             </div>
 
@@ -255,7 +255,7 @@ NEXT STEPS:
 3. Start with Phase 1 activities (first 30 days)
 4. Schedule a follow-up to track your progress
 
-Need help? Contact us at support@marketingplan.ai
+Need help? Contact us at support@marketingplan.beamxsolutions.com
 
 © 2024 MarketingPlan.ai - Powered by Claude AI
     `;
@@ -367,7 +367,7 @@ This marketing plan was generated using Claude AI's advanced reasoning capabilit
                 </div>
 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://marketingplan.ai/questionnaire" style="display: inline-block; background: #2563eb; color: white; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                    <a href="https://marketingplan.beamxsolutions.com/questionnaire" style="display: inline-block; background: #2563eb; color: white; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
                         🚀 Start Creating Your Plan
                     </a>
                 </div>
@@ -385,7 +385,7 @@ This marketing plan was generated using Claude AI's advanced reasoning capabilit
 
             <div style="background: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
                 <p style="margin: 0 0 10px; color: #6b7280; font-size: 14px;">
-                    Questions? Reply to this email or contact support@marketingplan.ai
+                    Questions? Reply to this email or contact support@marketingplan.beamxsolutions.com
                 </p>
                 <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                     © 2024 MarketingPlan.ai. All rights reserved.
@@ -417,9 +417,9 @@ WHY MARKETINGPLAN.AI?
 • Proven 9-square marketing framework
 • Actionable implementation guides
 
-Ready to get started? Visit: https://marketingplan.ai/questionnaire
+Ready to get started? Visit: https://marketingplan.beamxsolutions.com/questionnaire
 
-Questions? Contact us at support@marketingplan.ai
+Questions? Contact us at support@marketingplan.beamxsolutions.com
 
 © 2024 MarketingPlan.ai
     `;
