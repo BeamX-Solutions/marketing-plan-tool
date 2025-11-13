@@ -9,7 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Marketing Plan Tool — BeamX Solutions",
-  description: "Generate comprehensive marketing plans in minutes with Claude AI. Create your personalized marketing strategy using our proven 9-square framework.",
+  description: "Marketing Plan Tool by BeamX Solutions — generate comprehensive marketing plans in minutes with Claude AI using our proven 9-square framework.",
   keywords: "marketing plan, AI marketing, business strategy, Claude AI, marketing automation, small business marketing",
   authors: [{ name: "BeamX Solutions" }],
   creator: "BeamX Solutions",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "Marketing Plan Tool — BeamX Solutions",
     description: "Generate comprehensive marketing plans in minutes with Claude AI",
     url: "https://marketingplan.beamxsolutions.com",
-    siteName: "Marketing Plan Tool — BeamX Solutions",
+    siteName: "BeamX Solutions",
     type: "website",
   },
   twitter: {
