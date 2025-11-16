@@ -4,8 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plan } from '@/types';
 import Button from '@/components/ui/Button';
-import ShareModal from '@/components/plan/ShareModal';
-import { Download, Share, Mail } from 'lucide-react';
+import { Download, Mail, X } from 'lucide-react';
 
 interface PlanPageProps {
   params: { id: string };
@@ -16,7 +15,11 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const fetchPlan = useCallback(async () => {
     try {
@@ -40,6 +43,7 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
   }, [fetchPlan]);
 
   const downloadPDF = async () => {
+    setDownloading(true);
     try {
       const response = await fetch(`/api/plans/${params.id}/download`);
       
@@ -56,8 +60,44 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (err) {
-      alert('Failed to download PDF');
+      alert('Failed to download PDF. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const sendEmail = async () => {
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    setEmailSending(true);
+    try {
+      const response = await fetch(`/api/plans/${params.id}/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+
+      setEmailSuccess(true);
+      setTimeout(() => {
+        setShowEmailModal(false);
+        setEmailSuccess(false);
+        setEmail('');
+      }, 2000);
+    } catch (err) {
+      alert('Failed to send email. Please try again.');
+    } finally {
+      setEmailSending(false);
     }
   };
 
@@ -113,15 +153,19 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
               <p className="text-gray-600">Generated on {new Date(plan.createdAt).toLocaleDateString()}</p>
             </div>
             <div className="flex space-x-4">
-              <Button variant="outline" onClick={() => setShowShareModal(true)}>
-                <Share className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-              <Button variant="outline" onClick={() => setShowShareModal(true)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowEmailModal(true)}
+                className="cursor-pointer"
+              >
                 <Mail className="w-4 h-4 mr-2" />
-                Email
+                Email Plan
               </Button>
-              <Button onClick={downloadPDF}>
+              <Button 
+                onClick={downloadPDF} 
+                loading={downloading}
+                className="cursor-pointer"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download PDF
               </Button>
@@ -275,13 +319,7 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Next Steps</h3>
               <div className="space-y-3">
-                <Button className="w-full" onClick={() => router.push('/implementation')}>
-                  Start Implementation
-                </Button>
-                <Button variant="outline" className="w-full" onClick={() => {}}>
-                  Schedule Consultation
-                </Button>
-                <Button variant="outline" className="w-full" onClick={() => router.push('/questionnaire')}>
+                <Button className="w-full cursor-pointer" onClick={() => router.push('/questionnaire')}>
                   Create New Plan
                 </Button>
               </div>
@@ -290,13 +328,70 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
         </div>
       </div>
 
-      {/* Share Modal */}
-      <ShareModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        planId={params.id}
-        businessName={plan?.businessContext?.businessName}
-      />
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Email Your Plan
+              </h2>
+              <button
+                onClick={() => setShowEmailModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {emailSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-green-900 mb-2">
+                    Email Sent Successfully!
+                  </h3>
+                  <p className="text-green-700">
+                    Check your inbox for your marketing plan.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={emailSending}
+                    />
+                  </div>
+
+                  <p className="text-sm text-gray-600">
+                    We'll send your marketing plan PDF to this email address.
+                  </p>
+
+                  <Button
+                    onClick={sendEmail}
+                    loading={emailSending}
+                    disabled={!email}
+                    className="w-full cursor-pointer"
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send Plan
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

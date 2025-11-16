@@ -24,3 +24,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Add cursor pointer to interactive elements */
+button,
+a,
+[role="button"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Add hover effects for links */
+a:hover {
+  cursor: pointer !important;
+}
+
+/* Ensure input elements have text cursor */
+input,
+textarea,
+select {
+  cursor: text !important;
+}
+
+/* Select dropdown should have pointer */
+select {
+  cursor: pointer !important;
+}
