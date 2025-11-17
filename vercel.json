@@ -1,9 +1,0 @@
-{
-  "redirects": [
-    {
-      "source": "/:path*",
-      "destination": "https://marketingplan.beamxsolutions.com/:path*",
-      "permanent": true
-    }
-  ]
-}
