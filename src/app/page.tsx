@@ -292,8 +292,8 @@ export default function HomePage() {
               <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-600">
                 <li>
-                  <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:translate-x-1 inline-block transition-all duration-200">
-                    Claude AI
+                  <a href="https://beamxsolutions.com/tools/business-assessment" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:translate-x-1 inline-block transition-all duration-200">
+                    Business Assessment
                   </a>
                 </li>
                 <li><span className="text-gray-400">Marketing Guides (Coming Soon)</span></li>
@@ -304,7 +304,7 @@ export default function HomePage() {
               <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
               <ul className="space-y-2 text-gray-600">
                 <li>
-                  <a href="mailto:support@marketingplan.beamxsolutions.com" className="hover:text-blue-600 hover:translate-x-1 inline-block transition-all duration-200">
+                  <a href="https://beamxsolutions.com/contact" target="_blank" className="hover:text-blue-600 hover:translate-x-1 inline-block transition-all duration-200">
                     Contact Support
                   </a>
                 </li>
