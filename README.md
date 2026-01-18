@@ -29,7 +29,7 @@ A comprehensive web application that generates personalized marketing plans usin
 - **Claude AI API** (Anthropic)
 
 ### Services & Tools
-- **PostgreSQL** for data storage
+- **Supabase** (PostgreSQL) for data storage
 - **Resend** for email delivery
 - **React-PDF** for document generation
 - **Analytics tracking** with custom implementation
@@ -48,18 +48,34 @@ A comprehensive web application that generates personalized marketing plans usin
    ```
 
 3. **Environment Setup**
-   Create a `.env.local` file:
+   Create `.env` and `.env.local` files:
+
+   **For Supabase (Recommended):**
+   - Create a free account at [supabase.com](https://supabase.com)
+   - Create a new project and save your database password
+   - Go to Settings → Database → Connection Pooling
+   - Enable Session Pooler and copy the connection string
+
+   Create `.env` file (for Prisma):
    ```env
-   # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/marketing_plans?schema=public"
-   
+   # Supabase Database Connection Strings
+   DATABASE_URL="postgresql://postgres.[project-ref]:[PASSWORD]@aws-1-[region].pooler.supabase.com:5432/postgres?pgbouncer=true&connection_limit=1"
+   DIRECT_URL="postgresql://postgres.[project-ref]:[PASSWORD]@aws-1-[region].pooler.supabase.com:5432/postgres"
+   ```
+
+   Create `.env.local` file (for Next.js):
+   ```env
+   # Database (same as .env)
+   DATABASE_URL="postgresql://postgres.[project-ref]:[PASSWORD]@aws-1-[region].pooler.supabase.com:5432/postgres?pgbouncer=true&connection_limit=1"
+   DIRECT_URL="postgresql://postgres.[project-ref]:[PASSWORD]@aws-1-[region].pooler.supabase.com:5432/postgres"
+
    # NextAuth
    NEXTAUTH_URL="http://localhost:3000"
    NEXTAUTH_SECRET="your-nextauth-secret-here"
-   
+
    # Claude AI (Required)
    ANTHROPIC_API_KEY="your-anthropic-api-key-here"
-   
+
    # Email Service (Required)
    RESEND_API_KEY="your-resend-api-key-here"
    ```
@@ -110,10 +126,15 @@ A comprehensive web application that generates personalized marketing plans usin
 ### Netlify (Configured)
 This application is pre-configured for Netlify deployment:
 
-1. **Database Setup**: Set up a PostgreSQL database (Neon, Supabase, Railway)
+1. **Database Setup**: Create a Supabase project (free tier available)
+   - Enable Session Pooler for IPv4 compatibility
+   - Copy connection strings for environment variables
 2. **Push to GitHub**: Ensure code is in a GitHub repository
 3. **Connect to Netlify**: Link your GitHub repository to Netlify
 4. **Environment Variables**: Add all required variables in Netlify dashboard
+   - `DATABASE_URL` and `DIRECT_URL` from Supabase
+   - `NEXTAUTH_URL`, `NEXTAUTH_SECRET`
+   - `ANTHROPIC_API_KEY`, `RESEND_API_KEY`
 5. **Deploy**: Netlify will automatically build and deploy
 
 See `DEPLOYMENT.md` for detailed Netlify deployment instructions.

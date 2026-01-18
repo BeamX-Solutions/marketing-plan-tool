@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run db:generate:*)",
+      "Bash(npx prisma db push)",
+      "Bash(dir:*)",
+      "Bash(ipconfig:*)",
+      "Bash(findstr:*)",
+      "Bash(start npx prisma studio)",
+      "Bash(npx prisma validate:*)"
+    ]
+  }
+}
