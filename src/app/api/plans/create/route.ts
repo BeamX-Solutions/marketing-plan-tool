@@ -13,14 +13,14 @@ export async function POST(request: NextRequest) {
 
     // Create the plan without user authentication
     console.log('Creating plan with UUID:', uuid);
-    console.log('businessContext', JSON.stringify(businessContext || {}));
-    console.log('questionnaireResponses', JSON.stringify(questionnaireResponses || {}));
+    console.log('businessContext', businessContext);
+    console.log('questionnaireResponses', questionnaireResponses);
     const plan = await prisma.plan.create({
       data: {
         id: uuidv4(),
         userId: uuidv4(), // No user required
-        businessContext: JSON.stringify(businessContext || {}),
-        questionnaireResponses: JSON.stringify(questionnaireResponses || {}),
+        businessContext: businessContext || {},
+        questionnaireResponses: questionnaireResponses || {},
         status: 'in_progress',
         completionPercentage: 0
       }

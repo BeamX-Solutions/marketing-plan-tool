@@ -62,7 +62,7 @@ export async function POST(
     // Update plan with analysis
     await prisma.plan.update({
       where: { id: planId },
-      data: { 
+      data: {
         claudeAnalysis: JSON.stringify(analysis),
         status: 'generating',
         completionPercentage: 50

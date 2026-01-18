@@ -26,7 +26,7 @@ export async function GET(
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
 
-    // Helper function to safely parse JSON
+    // Helper function to safely parse JSON strings
     const safeJsonParse = (jsonString: string | null) => {
       if (!jsonString) return null;
       try {
@@ -36,11 +36,11 @@ export async function GET(
       }
     };
 
-    // Parse JSON strings back to objects for the client
+    // Parse String JSON fields back to objects for the client
+    // businessContext and questionnaireResponses are Json type (already objects)
+    // claudeAnalysis, generatedContent, planMetadata are String type (need parsing)
     const parsedPlan = {
       ...plan,
-      businessContext: safeJsonParse(plan.businessContext),
-      questionnaireResponses: safeJsonParse(plan.questionnaireResponses),
       claudeAnalysis: safeJsonParse(plan.claudeAnalysis),
       generatedContent: safeJsonParse(plan.generatedContent),
       planMetadata: safeJsonParse(plan.planMetadata),
