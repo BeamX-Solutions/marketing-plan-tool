@@ -26,9 +26,20 @@ export async function POST(request: NextRequest) {
       }
     });
 
-     console.error('prisma Body:', plan);
+    console.error('prisma Body:', plan);
+    console.error('Returning plan ID:', plan.id);
 
-    return NextResponse.json(plan);
+    // Explicitly return the plan with serialized fields
+    return NextResponse.json({
+      id: plan.id,
+      userId: plan.userId,
+      businessContext: plan.businessContext,
+      questionnaireResponses: plan.questionnaireResponses,
+      status: plan.status,
+      completionPercentage: plan.completionPercentage,
+      createdAt: plan.createdAt,
+      updatedAt: plan.updatedAt
+    });
   } catch (error) {
     console.error('Error creating plan:', error);
     return NextResponse.json(
