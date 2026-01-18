@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plan } from '@/types';
 import Button from '@/components/ui/Button';
 import { Download, Mail, X } from 'lucide-react';
 
 interface PlanPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
   const router = useRouter();
+  const { id } = use(params); // Unwrap the Promise
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +24,8 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
 
   const fetchPlan = useCallback(async () => {
     try {
-      const response = await fetch(`/api/plans/${params.id}`);
-      
+      const response = await fetch(`/api/plans/${id}`);
+
       if (!response.ok) {
         throw new Error('Plan not found');
       }
@@ -36,7 +37,7 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
     } finally {
       setLoading(false);
     }
-  }, [params.id]);
+  }, [id]);
 
   useEffect(() => {
     fetchPlan();
@@ -45,7 +46,7 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
   const downloadPDF = async () => {
     setDownloading(true);
     try {
-      const response = await fetch(`/api/plans/${params.id}/download`);
+      const response = await fetch(`/api/plans/${id}/download`);
       
       if (!response.ok) {
         throw new Error('Failed to generate PDF');
@@ -76,7 +77,7 @@ const PlanPage: React.FC<PlanPageProps> = ({ params }) => {
 
     setEmailSending(true);
     try {
-      const response = await fetch(`/api/plans/${params.id}/send-email`, {
+      const response = await fetch(`/api/plans/${id}/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
