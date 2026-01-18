@@ -95,26 +95,60 @@ export class ClaudeService {
       .replace(/```(?:json)?\s*\n?/gi, '')  // Remove opening fences
       .replace(/\n?```\s*$/gi, '')          // Remove closing fences
       .trim();
-    
-    // Quick check for obvious truncation (unbalanced quotes)
-    const quoteCount = (cleaned.match(/"/g) || []).length;
-    if (quoteCount % 2 !== 0) {
-      console.warn('Potential JSON truncation detected: Odd number of quotes (' + quoteCount + ')');
-      // Optional: You could truncate to last complete string here, but better to increase tokens
+
+    // Find the first '{' or '[' and extract only the JSON object/array
+    const startIndex = cleaned.search(/[\{\[]/);
+    if (startIndex === -1) {
+      throw new Error('No JSON object or array found in response');
     }
-    
-    // If it still looks like JSON-wrapped, extract via regex as fallback
-    if (cleaned.startsWith('{') || cleaned.startsWith('[')) {
-      return cleaned;
+
+    // Extract from the first bracket
+    let jsonText = cleaned.substring(startIndex);
+
+    // Find the matching closing bracket
+    let depth = 0;
+    let inString = false;
+    let escapeNext = false;
+    let endIndex = -1;
+
+    for (let i = 0; i < jsonText.length; i++) {
+      const char = jsonText[i];
+
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        escapeNext = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = !inString;
+        continue;
+      }
+
+      if (!inString) {
+        if (char === '{' || char === '[') {
+          depth++;
+        } else if (char === '}' || char === ']') {
+          depth--;
+          if (depth === 0) {
+            endIndex = i + 1;
+            break;
+          }
+        }
+      }
     }
-    
-    // Fallback regex to pull JSON object/array from text
-    const jsonMatch = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (jsonMatch) {
-      return jsonMatch[0];
+
+    if (endIndex === -1) {
+      console.warn('Potential JSON truncation detected: Could not find closing bracket');
+      // Return the full text and let JSON.parse fail with a better error
+      return jsonText;
     }
-    
-    throw new Error('No valid JSON found in response. Raw length: ' + text.length + '. Check for truncation.');
+
+    return jsonText.substring(0, endIndex);
   }
 
   // Optional: Simple retry wrapper (call this around API if needed)
