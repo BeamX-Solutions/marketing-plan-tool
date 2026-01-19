@@ -43,7 +43,7 @@ export default function HomePage() {
               in Minutes
             </h1>
             <p className="text-xl text-gray-600 mb-8">
-              Powered by Claude AI, our intelligent questionnaire creates a comprehensive marketing strategy 
+              Our intelligent questionnaire creates a comprehensive marketing strategy
               tailored specifically to your business. No marketing experience required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
