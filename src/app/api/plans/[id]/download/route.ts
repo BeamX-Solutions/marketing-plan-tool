@@ -1,32 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/lib/auth';
 import { pdfService } from '@/lib/pdf/pdfService';
 
 const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const planId = params.id;
+    const { id: planId } = await params;
 
     // Find the plan with generated content
-    const plan = await prisma.plan.findFirst({
+    const plan = await prisma.plan.findUnique({
       where: {
-        id: planId,
-        user: { email: session.user.email }
-      },
-      include: {
-        user: true
+        id: planId
       }
     });
 
@@ -45,8 +33,8 @@ export async function GET(
       generatedContent: plan.generatedContent as any,
       businessContext: plan.businessContext as any,
       user: {
-        email: plan.user.email,
-        businessName: plan.user.businessName || undefined
+        email: 'guest@marketingplan.com',
+        businessName: undefined
       },
       createdAt: plan.createdAt.toISOString()
     };
@@ -56,7 +44,7 @@ export async function GET(
     const pdfBuffer = await pdfService.generateMarketingPlanPDF(pdfData);
 
     // Prepare response headers
-    const filename = pdfService.getFileName(plan.user.businessName || undefined, plan.createdAt.toISOString());
+    const filename = pdfService.getFileName(undefined, plan.createdAt.toISOString());
     const headers = new Headers();
     headers.set('Content-Type', pdfService.getMimeType());
     headers.set('Content-Disposition', pdfService.getContentDisposition(filename));
@@ -87,7 +75,7 @@ export async function GET(
     try {
       await prisma.claudeInteraction.create({
         data: {
-          planId: params.id,
+          planId: planId,
           interactionType: 'pdf_download_error',
           promptData: { error: error instanceof Error ? error.message : 'Unknown error' },
           claudeResponse: { success: false, errorAt: new Date().toISOString() }

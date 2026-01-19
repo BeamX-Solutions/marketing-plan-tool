@@ -12,6 +12,7 @@ const SAMPLE_PLANS = [
     title: 'B2B SaaS Marketing Plan',
     industry: 'B2B Software',
     description: 'Complete marketing strategy for a project management SaaS platform targeting small to medium-sized businesses.',
+    rating: 4.9,
     image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&auto=format&fit=crop&q=80',
     gradient: 'from-blue-500 to-cyan-500',
     plan: {

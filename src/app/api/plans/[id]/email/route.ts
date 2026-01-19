@@ -1,34 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/lib/auth';
 import { emailService } from '@/lib/email/emailService';
 
 const prisma = new PrismaClient();
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const { id: planId } = await params;
     const body = await request.json();
-    const { action, recipientEmail, message } = body;
-    const planId = params.id;
+    const { action, recipientEmail, message, senderEmail } = body;
 
     // Find the plan
-    const plan = await prisma.plan.findFirst({
+    const plan = await prisma.plan.findUnique({
       where: {
-        id: planId,
-        user: { email: session.user.email }
-      },
-      include: {
-        user: true
+        id: planId
       }
     });
 
@@ -46,10 +34,13 @@ export async function POST(
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const downloadUrl = `${baseUrl}/plan/${plan.id}`;
 
+    // Get user email from request body or use default
+    const userEmail = senderEmail || recipientEmail || 'guest@marketingplan.com';
+
     // Prepare email data
     const emailData = {
-      businessName: plan.user.businessName || undefined,
-      userEmail: plan.user.email,
+      businessName: undefined,
+      userEmail: userEmail,
       planId: plan.id,
       generatedContent: plan.generatedContent as any,
       businessContext: plan.businessContext as any,
@@ -62,7 +53,13 @@ export async function POST(
 
     switch (action) {
       case 'send_completion':
-        // Send completion email to the plan owner
+        // Send completion email to the specified email
+        if (!recipientEmail) {
+          return NextResponse.json({
+            error: 'Recipient email is required'
+          }, { status: 400 });
+        }
+        emailData.userEmail = recipientEmail;
         success = await emailService.sendPlanCompletionEmail(emailData);
         emailType = 'completion';
         break;
@@ -70,12 +67,12 @@ export async function POST(
       case 'share':
         // Share plan with another email address
         if (!recipientEmail) {
-          return NextResponse.json({ 
-            error: 'Recipient email is required for sharing' 
+          return NextResponse.json({
+            error: 'Recipient email is required for sharing'
           }, { status: 400 });
         }
 
-        const senderName = plan.user.businessName || plan.user.email.split('@')[0];
+        const senderName = senderEmail ? senderEmail.split('@')[0] : 'A colleague';
         success = await emailService.sendPlanShareEmail(
           emailData,
           recipientEmail,
@@ -96,13 +93,13 @@ export async function POST(
       data: {
         planId: plan.id,
         interactionType: `email_${emailType}`,
-        promptData: { 
+        promptData: {
           action,
-          recipientEmail: action === 'share' ? recipientEmail : plan.user.email,
+          recipientEmail: recipientEmail,
           success,
           message: message || null
         },
-        claudeResponse: { 
+        claudeResponse: {
           success,
           sentAt: new Date().toISOString(),
           emailType
@@ -128,14 +125,14 @@ export async function POST(
     try {
       await prisma.claudeInteraction.create({
         data: {
-          planId: params.id,
+          planId: planId,
           interactionType: 'email_error',
-          promptData: { 
-            error: error instanceof Error ? error.message : 'Unknown error' 
+          promptData: {
+            error: error instanceof Error ? error.message : 'Unknown error'
           },
-          claudeResponse: { 
-            success: false, 
-            errorAt: new Date().toISOString() 
+          claudeResponse: {
+            success: false,
+            errorAt: new Date().toISOString()
           }
         }
       });
